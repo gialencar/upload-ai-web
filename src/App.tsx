@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "./components/ui/select";
 import { Slider } from "./components/ui/slider";
+import { ThemeToggle } from "./components/theme-toggle";
 
 export function App() {
   return (
@@ -18,8 +19,9 @@ export function App() {
       <div className="flex items-center justify-between border-b px-6 py-3 ">
         <h1 className="text-xl font-bold">upload.ai</h1>
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <span className="text-small text-muted-foreground">
-            Desenvolvido com 💜 no NLW da Rocketseat
+            Desenvolvido com 🧡 no NLW da Rocketseat
           </span>
 
           <Separator orientation="vertical" className="h-6" />
@@ -46,7 +48,7 @@ export function App() {
           </div>
           <p className="text-sm text-muted-foreground">
             Lembre-se: você pode utilizar a variável{" "}
-            <code className="text-violet-400">{`{transcription}`}</code> no seu
+            <code className="text-orange-400">{`{transcription}`}</code> no seu
             prompt para adicionar o conteúdo da transcrição do vídeo
             selecionado.
           </p>
