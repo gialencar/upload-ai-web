@@ -6,9 +6,20 @@ import { Textarea } from "./ui/textarea";
 import { FormEvent, useMemo, useRef, useState } from "react";
 import { getFFmpeg } from "../lib/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
+import { api } from "../lib/axios";
+
+type Status = "waiting" | "converting" | "uploading" | "generating" | "success";
+
+const statusMessages = {
+  converting: "Convertendo...",
+  generating: "Transcrevendo...",
+  uploading: "Carregando...",
+  success: "Sucesso!",
+};
 
 export function VideoImputForm() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [status, setStatus] = useState<Status>("waiting");
   const promptInputRef = useRef<HTMLTextAreaElement>(null);
 
   function handleFileSelected({
@@ -81,9 +92,24 @@ export function VideoImputForm() {
       return;
     }
 
+    setStatus("converting");
     const audioFile = await convertVideoToAudio(videoFile);
 
-    // console.log(audioFile, prompt)
+    const data = new FormData();
+
+    data.append("file", audioFile);
+
+    setStatus("uploading");
+    const response = await api.post("/videos", data);
+
+    const videoID = response.data.video.id;
+
+    setStatus("generating");
+    await api.post(`/videos/${videoID}/transcription`, {
+      prompt,
+    });
+
+    setStatus("success");
   }
 
   return (
@@ -122,13 +148,24 @@ export function VideoImputForm() {
         <Textarea
           id="transcription_prompt"
           ref={promptInputRef}
+          disabled={status !== "waiting"}
           placeholder="Inclua palavras-chave mencionadas no vídeo separadas por vírgula. (,)"
           className="h-20 resize-none leading-relaxed"
         />
 
-        <Button className="w-full">
-          Carregar vídeo
-          <Upload className="ml-2 h-4 w-4" />
+        <Button
+          data-success={status === "success"}
+          disabled={status !== "waiting"}
+          className="w-full data-[success=true]:bg-emerald-400"
+        >
+          {status === "waiting" ? (
+            <>
+              Carregar vídeo
+              <Upload className="ml-2 h-4 w-4" />
+            </>
+          ) : (
+            statusMessages[status]
+          )}
         </Button>
       </div>
     </form>
